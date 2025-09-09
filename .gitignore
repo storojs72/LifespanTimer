@@ -1,0 +1,65 @@
+# This .gitignore file has been generated using ChatGPT
+
+# Xcode
+#
+# Ignore build products and intermediate files
+build/
+DerivedData/
+
+# User-specific settings
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
+# Older Xcode files
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+.swiftpm/
+.build/
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Carthage
+Carthage/Build/
+
+# Accio dependency manager
+Dependencies/
+.accio/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Code Injection
+iOSInjectionProject/
+
+# Coverage
+*.xccoverage
+*.profdata
+
+# Other
+*.moved-aside
+*.xcuserstate
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# macOS metadata
+.DS_Store
+*.swp
+*.lock
+*.tmp
+*.orig
+
