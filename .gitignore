@@ -7,7 +7,7 @@ build/
 DerivedData/
 
 # User-specific settings
-xcuserdata/
+LifespanTimer.xcodeproj/xcuserdata/
 *.xcuserstate
 *.xcscmblueprint
 

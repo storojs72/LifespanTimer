@@ -9,6 +9,7 @@ import SwiftUI
 import WidgetKit
 import Combine
 
+// TODO: increase number of countries
 // This is the average life expectancy in Ukraine, Portugal, UK and USA
 let MALES = [64, 79, 79, 75]
 let FEMALES = [74, 85, 83, 80]
@@ -46,16 +47,19 @@ struct InitialView: View {
     
     @State private var selectedGender = "Male"
     @State private var selectedCountry = "Ukraine"
-    @State private var selectedAge = 1
+//    @State private var selectedAge = 1
+    @State private var selectedDate = Date()
+//    @State private var showWheelPicker = false
     
     @State var showingAlert: Bool = false
     
     var body: some View {
+        ScrollView {
             ZStack {
                 Color.primary.ignoresSafeArea()
                 VStack(spacing: 20) {
                     // Choosing Sex
-                    Text("Choose your gender:")
+                    Text("Your gender:")
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.white)
                         .font(.largeTitle)
@@ -79,24 +83,20 @@ struct InitialView: View {
                     )
                     
                     // Chosing age
-                    Text("Choose your age:")
+                    Text("Your birthday:")
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.white)
                         .font(.largeTitle)
                         .fontDesign(.monospaced)
                         .frame(width: 300)
-                    Picker(selection: $selectedAge, label: /*@START_MENU_TOKEN@*/Text("Picker")/*@END_MENU_TOKEN@*/) {
-                        ForEach(ages, id: \.self) {
-                            Text(String($0))
-                                .multilineTextAlignment(.center)
-                                .foregroundStyle(.black)
-                                .font(.headline)
-                                .fontDesign(.monospaced)
-                                .frame(width: 300)
-                        }
-                    }
-                    .pickerStyle(.inline)
-                    .frame(height: 100)
+
+                    DatePicker(
+                        "",
+                        selection: $selectedDate,
+                        in: ...Date(),
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
+                    .datePickerStyle(.graphical)
                     .background(
                         RoundedRectangle(cornerRadius: 10)
                             .fill(Color.white)
@@ -104,7 +104,7 @@ struct InitialView: View {
                     
                     
                     // Chosing country
-                    Text("Choose your country:")
+                    Text("Your country:")
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.white)
                         .font(.largeTitle)
@@ -149,8 +149,26 @@ struct InitialView: View {
                                     FEMALES[index]
                                 }
                                 
-                                let years_left = life_expectancy - selectedAge
-                                let seconds_left = years_left * 365 * 24 * 60 * 60 // TODO: increase accuracy
+                                let year = Calendar.current.component(.year, from: selectedDate)
+                                let months_to_subtract = Calendar.current.component(.month, from: selectedDate)
+                                let days_to_subtract = Calendar.current.component(.day, from: selectedDate)
+                                let hours_to_subtract = Calendar.current.component(.hour, from: selectedDate)
+                                let minutes_to_subtract = Calendar.current.component(.minute, from: selectedDate)
+
+                                let months_to_seconds = months_to_subtract * 30 * 24 * 60 * 60;
+                                let days_to_seconds = days_to_subtract * 24 * 60 * 60;
+                                let hours_to_seconds = hours_to_subtract * 60 * 60;
+                                let minuts_to_seconds = minutes_to_subtract * 60;
+
+                                // If you was born in the 1st of October, we have to additionally subtract exactly 10 months,
+                                // since year officially starts from the 1st of January
+                                let seconds_to_subtract = months_to_seconds + days_to_seconds + hours_to_seconds + minuts_to_seconds;
+
+                                let selectedAge = Calendar.current.component(.year, from: Date()) - year;
+                                let years_left = life_expectancy - selectedAge;
+
+                                // TODO: improve accuracy furthermore (consider 31 / 30 / 29 / 28 days in the given month)
+                                let seconds_left = years_left * 365 * 24 * 60 * 60 - seconds_to_subtract;
 
                                 // Using AppGroup: group.lifespan-timer to share UserDefaults data with the Widget
                                 if let userDefaults = UserDefaults(suiteName: "group.lifespan-timer") {
@@ -177,7 +195,10 @@ struct InitialView: View {
                     .buttonStyle(.bordered)
                     .tint(.white)
                 }
+            }
         }
+        .background(Color.primary.ignoresSafeArea())
+        .scrollContentBackground(.hidden)
     }
 }
 
