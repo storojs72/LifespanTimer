@@ -19,6 +19,9 @@ struct InitialView: View {
     @AppStorage("welcomeScreenShown")
     var welcomeScreenShown: Bool = false
     
+    @AppStorage("userAlreadyLivedMoreThanAverage")
+    var userAlreadyLivedMoreThanAverage: Bool = false
+
     func goHome() {
         // transfer control to MainView
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -117,7 +120,7 @@ struct InitialView: View {
                     DatePicker(
                         "",
                         selection: $selectedDate,
-                        in: ...Date(),
+                        in: Calendar.current.date(byAdding: .year, value: -100, to: Date())!...Date(),
                         displayedComponents: [.date, .hourAndMinute]
                     )
                     .datePickerStyle(.graphical)
@@ -148,9 +151,13 @@ struct InitialView: View {
                                     FEMALES[index]
                                 }
                                 
-                                let approximateDeathDate = Calendar.current.date(byAdding: .year, value: life_expectancy, to: selectedDate)
-                                if let userDefaults = UserDefaults(suiteName: "group.lifespan-timer") {
-                                    userDefaults.setValue(approximateDeathDate?.timeIntervalSince1970, forKey: "DeathDate")
+                                let approximateDeathDate = Calendar.current.date(byAdding: .year, value: life_expectancy, to: selectedDate)!
+                                if approximateDeathDate < Date() {
+                                    userAlreadyLivedMoreThanAverage = true
+                                } else {
+                                    if let userDefaults = UserDefaults(suiteName: "group.lifespan-timer") {
+                                        userDefaults.setValue(approximateDeathDate.timeIntervalSince1970, forKey: "DeathDate")
+                                    }
                                 }
                                 UserDefaults.standard.synchronize()
                                 
