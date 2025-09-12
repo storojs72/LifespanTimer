@@ -82,27 +82,6 @@ struct InitialView: View {
                             .fill(Color.white)
                     )
                     
-                    // Chosing age
-                    Text("Your birthday:")
-                        .multilineTextAlignment(.center)
-                        .foregroundStyle(.white)
-                        .font(.largeTitle)
-                        .fontDesign(.monospaced)
-                        .frame(width: 300)
-
-                    DatePicker(
-                        "",
-                        selection: $selectedDate,
-                        in: ...Date(),
-                        displayedComponents: [.date, .hourAndMinute]
-                    )
-                    .datePickerStyle(.graphical)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.white)
-                    )
-                    
-                    
                     // Chosing country
                     Text("Your country:")
                         .multilineTextAlignment(.center)
@@ -127,7 +106,27 @@ struct InitialView: View {
                             .fill(Color.white)
                     )
                     
+                    // Chosing age
+                    Text("Your birthday:")
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.white)
+                        .font(.largeTitle)
+                        .fontDesign(.monospaced)
+                        .frame(width: 300)
+
+                    DatePicker(
+                        "",
+                        selection: $selectedDate,
+                        in: ...Date(),
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
+                    .datePickerStyle(.graphical)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.white)
+                    )
                     
+
                     Button(">>>>") {
                         showingAlert = true
                     }.alert(isPresented: $showingAlert) {
@@ -149,30 +148,8 @@ struct InitialView: View {
                                     FEMALES[index]
                                 }
                                 
-                                let year = Calendar.current.component(.year, from: selectedDate)
-                                let months_to_subtract = Calendar.current.component(.month, from: selectedDate)
-                                let days_to_subtract = Calendar.current.component(.day, from: selectedDate)
-                                let hours_to_subtract = Calendar.current.component(.hour, from: selectedDate)
-                                let minutes_to_subtract = Calendar.current.component(.minute, from: selectedDate)
-
-                                let months_to_seconds = months_to_subtract * 30 * 24 * 60 * 60;
-                                let days_to_seconds = days_to_subtract * 24 * 60 * 60;
-                                let hours_to_seconds = hours_to_subtract * 60 * 60;
-                                let minuts_to_seconds = minutes_to_subtract * 60;
-
-                                // If you was born in the 1st of October, we have to additionally subtract exactly 10 months,
-                                // since year officially starts from the 1st of January
-                                let seconds_to_subtract = months_to_seconds + days_to_seconds + hours_to_seconds + minuts_to_seconds;
-
-                                let selectedAge = Calendar.current.component(.year, from: Date()) - year;
-                                let years_left = life_expectancy - selectedAge;
-
-                                // TODO: improve accuracy furthermore (consider 31 / 30 / 29 / 28 days in the given month)
-                                let seconds_left = years_left * 365 * 24 * 60 * 60 - seconds_to_subtract;
-
-                                // Using AppGroup: group.lifespan-timer to share UserDefaults data with the Widget
+                                let approximateDeathDate = Calendar.current.date(byAdding: .year, value: life_expectancy, to: selectedDate)
                                 if let userDefaults = UserDefaults(suiteName: "group.lifespan-timer") {
-                                    let approximateDeathDate = Calendar.current.date(byAdding: .second, value: seconds_left, to: Date())
                                     userDefaults.setValue(approximateDeathDate?.timeIntervalSince1970, forKey: "DeathDate")
                                 }
                                 UserDefaults.standard.synchronize()
