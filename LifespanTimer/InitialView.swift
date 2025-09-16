@@ -158,6 +158,7 @@ struct InitialView: View {
                                 } else {
                                     if let userDefaults = UserDefaults(suiteName: "group.lifespan-timer") {
                                         userDefaults.setValue(approximateDeathDate.timeIntervalSince1970, forKey: "DeathDate")
+                                        userDefaults.setValue(approximateDeathDate.timeIntervalSince1970, forKey: "DeathDateUpdateable")
                                     }
                                 }
                                 UserDefaults.standard.synchronize()
