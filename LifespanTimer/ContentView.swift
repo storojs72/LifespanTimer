@@ -8,6 +8,16 @@
 import SwiftUI
 import WidgetKit
 
+let sharedDefaults = UserDefaults(suiteName: "group.lifespan-timer")
+
+func updateWidgetValues(title: String, subtitle: String) {
+    sharedDefaults?.set(title, forKey: "title")
+    sharedDefaults?.set(subtitle, forKey: "subtitle")
+    sharedDefaults?.synchronize()
+    // Request widget reload
+    WidgetCenter.shared.reloadAllTimelines()
+}
+
 extension UserDefaults {
     var welcomeScreenShown: Bool {
         get {
@@ -148,7 +158,8 @@ struct RegularFlowView: View {
                     }
 
                     refreshID = UUID()
-                    WidgetCenter.shared.reloadAllTimelines()
+                    updateWidgetValues(title: "-", subtitle: "1 year")
+
                 }) {
                     Text("-")
                         .padding(20)
@@ -171,7 +182,7 @@ struct RegularFlowView: View {
                     }
 
                     refreshID = UUID()
-                    WidgetCenter.shared.reloadAllTimelines()
+                    updateWidgetValues(title: "+", subtitle: "2 years")
                 }) {
                     Text("+")
                         .padding(20)

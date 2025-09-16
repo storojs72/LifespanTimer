@@ -8,29 +8,77 @@
 import WidgetKit
 import SwiftUI
 
+struct SimpleEntry: TimelineEntry {
+    let date: Date
+    let title: String
+    let subtitle: String
+}
+
 struct Provider: AppIntentTimelineProvider {
+    let sharedDefaults = UserDefaults(suiteName: "group.lifespan-timer")
+    
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: ConfigurationAppIntent())
+        SimpleEntry(date: Date(), title: "Title", subtitle: "Subtitle")
     }
 
     func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: configuration)
+        let title = sharedDefaults?.string(forKey: "title") ?? "Title"
+        let subtitle = sharedDefaults?.string(forKey: "subtitle") ?? "Subtitle"
+        return SimpleEntry(date: Date(), title: title, subtitle: subtitle)
     }
     
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
-        var entries: [SimpleEntry] = []
+        let title = sharedDefaults?.string(forKey: "title") ?? "Title"
+        let subtitle = sharedDefaults?.string(forKey: "subtitle") ?? "Subtitle"
+        
+        let entry = SimpleEntry(date: Date(), title: title, subtitle: subtitle)
 
-        let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, configuration: configuration)
-            entries.append(entry)
-        }
-
-        return Timeline(entries: entries, policy: .never)
+        return Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(5)))
     }
 }
 
+struct LifespanTimerWidgetEntryView : View {
+    var entry: Provider.Entry
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+//            Color.primary.frame(width: 500, height: 500)
+            Text(entry.title)
+                .multilineTextAlignment(.center)
+                .font(.callout)
+                .fontDesign(.monospaced)
+                .frame(width: 300)
+                .foregroundStyle(.green)
+                .font(.headline)
+            Text(entry.subtitle)
+                .multilineTextAlignment(.center)
+                .font(.callout)
+                .fontDesign(.monospaced)
+                .frame(width: 300)
+                .foregroundStyle(.green)
+                .font(.subheadline)
+        }
+        .padding()
+    }
+}
+
+struct LifespanTimerWidget: Widget {
+    let kind: String = "LifespanTimerWidget"
+
+    var body: some WidgetConfiguration {
+        AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
+            LifespanTimerWidgetEntryView(entry: entry)
+                .containerBackground(.fill.tertiary, for: .widget)
+        }.supportedFamilies([
+            .systemSmall,
+            .systemMedium,
+            .systemLarge,
+            .accessoryInline,
+        ])
+    }
+}
+
+/*
 struct SimpleEntry: TimelineEntry {
     let date: Date
     let configuration: ConfigurationAppIntent
@@ -99,4 +147,4 @@ struct LifespanTimerWidget: Widget {
             .accessoryInline,
         ])
     }
-}
+}*/
