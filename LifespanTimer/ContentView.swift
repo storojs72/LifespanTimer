@@ -54,10 +54,8 @@ func get_lifetime_to_display() -> Date {
             return lifetime
         } else {
             let death_date = userDefaults.double(forKey: "DeathDate")
-            let initial_date = userDefaults.double(forKey: "InitialDate")
             let now = Date().timeIntervalSince1970
-            let passed_since_initial_date = now - initial_date
-            let lifetime = Date().addingTimeInterval(death_date - passed_since_initial_date)
+            let lifetime = Date().addingTimeInterval(death_date - now)
             userDefaults.setValue(lifetime.timeIntervalSince1970, forKey: "lifetime")
             return lifetime
         }

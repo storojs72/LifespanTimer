@@ -151,6 +151,7 @@ struct InitialView: View {
                                     FEMALES[index]
                                 }
                                 
+                                // compute approximate date of death and save it to UserDefaults
                                 let approximateDeathDate = Calendar.current.date(byAdding: .year, value: life_expectancy, to: selectedDate)!
                                 if approximateDeathDate < Date() {
                                     userAlreadyLivedMoreThanAverage = true
