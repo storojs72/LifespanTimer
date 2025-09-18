@@ -16,13 +16,20 @@ let FEMALES = [74, 85, 83, 80]
 
 struct InitialView: View {
     
-    @AppStorage("welcomeScreenShown")
+    @AppStorage("welcomeScreenShown", store: UserDefaults(suiteName: "group.lifespan-timer"))
     var welcomeScreenShown: Bool = false
     
-    @AppStorage("userAlreadyLivedMoreThanAverage")
+    @AppStorage("userAlreadyLivedMoreThanAverage", store: UserDefaults(suiteName: "group.lifespan-timer"))
     var userAlreadyLivedMoreThanAverage: Bool = false
 
+    @AppStorage("deathDate", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var deathDate: Double = 0.0
+
+    @AppStorage("deathDateUpdateable", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var deathDateUpdateable: Double = 0.0
+
     func goHome() {
+
         // transfer control to MainView
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
@@ -156,12 +163,9 @@ struct InitialView: View {
                                 if approximateDeathDate < Date() {
                                     userAlreadyLivedMoreThanAverage = true
                                 } else {
-                                    if let userDefaults = UserDefaults(suiteName: "group.lifespan-timer") {
-                                        userDefaults.setValue(approximateDeathDate.timeIntervalSince1970, forKey: "DeathDate")
-                                        userDefaults.setValue(approximateDeathDate.timeIntervalSince1970, forKey: "DeathDateUpdateable")
-                                    }
+                                    deathDate = approximateDeathDate.timeIntervalSince1970
+                                    deathDateUpdateable = approximateDeathDate.timeIntervalSince1970
                                 }
-                                UserDefaults.standard.synchronize()
                                 
                                 // refresh our widgets
                                 WidgetCenter.shared.reloadAllTimelines()

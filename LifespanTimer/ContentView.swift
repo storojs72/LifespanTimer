@@ -8,42 +8,18 @@
 import SwiftUI
 import WidgetKit
 
-let sharedDefaults = UserDefaults(suiteName: "group.lifespan-timer")
-
-func updateWidgetValues(title: String, subtitle: String) {
-    sharedDefaults?.set(title, forKey: "title")
-    sharedDefaults?.set(subtitle, forKey: "subtitle")
-    sharedDefaults?.synchronize()
-    // Request widget reload
-    WidgetCenter.shared.reloadAllTimelines()
-}
-
-extension UserDefaults {
-    var welcomeScreenShown: Bool {
-        get {
-            return (UserDefaults.standard.value(forKey: "welcomeScreenShown") as? Bool) ?? false
-        }
-        set {
-            UserDefaults.standard.setValue(newValue, forKey: "welcomeScreenShown")
-        }
-    }
-
-    var userAlreadyLivedMoreThanAverage: Bool {
-        get {
-            return (UserDefaults.standard.value(forKey: "userAlreadyLivedMoreThanAverage") as? Bool) ?? false
-        }
-        set {
-            UserDefaults.standard.setValue(newValue, forKey: "userAlreadyLivedMoreThanAverage")
-        }
-    }
-}
-
 struct ContentView: View {
+    @AppStorage("welcomeScreenShown", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var welcomeScreenShown: Bool = false
+
+    @AppStorage("userAlreadyLivedMoreThanAverage", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var userAlreadyLivedMoreThanAverage: Bool = false
+
     var body: some View {
-        if UserDefaults.standard.welcomeScreenShown {
+        if welcomeScreenShown {
             ZStack {
                 Color.primary.ignoresSafeArea()
-                if UserDefaults.standard.userAlreadyLivedMoreThanAverage {
+                if userAlreadyLivedMoreThanAverage {
                     LifetimeIsZeroFlowView().padding()
                 } else {
                     RegularFlowView().padding()
@@ -55,45 +31,83 @@ struct ContentView: View {
     }
 }
 
-// TODO: invoke this function from time to time in order to update lifetime value in UserDefaults
 func get_lifetime_to_display() -> Date {
-    if let userDefaults = UserDefaults(suiteName: "group.lifespan-timer") {
-        if UserDefaults.standard.userAlreadyLivedMoreThanAverage {
-            let lifetime = Calendar.current.date(byAdding: .year, value: 20, to: Date())!
-            userDefaults.setValue(lifetime.timeIntervalSince1970, forKey: "lifetime")
-            return lifetime
-        } else {
-            let death_date = userDefaults.double(forKey: "DeathDate")
-            let now = Date().timeIntervalSince1970
-            let lifetime = Date().addingTimeInterval(death_date - now)
-            userDefaults.setValue(lifetime.timeIntervalSince1970, forKey: "lifetime")
-            userDefaults.setValue(lifetime.timeIntervalSince1970, forKey: "lifetimeUpdateable")
-            return lifetime
-        }
+    @AppStorage("welcomeScreenShown", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var welcomeScreenShown: Bool = false
+
+    @AppStorage("userAlreadyLivedMoreThanAverage", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var userAlreadyLivedMoreThanAverage: Bool = false
+
+    @AppStorage("lifetime", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var lifetime: Double = 0.0
+
+    @AppStorage("lifetimeUpdateable", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var lifetimeUpdateable: Double = 0.0
+
+    @AppStorage("deathDate", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var deathDate: Double = 0.0
+
+    if userAlreadyLivedMoreThanAverage {
+        let lifetimeDate = Calendar.current.date(byAdding: .year, value: 20, to: Date())!
+        lifetime = lifetimeDate.timeIntervalSince1970
+        lifetimeUpdateable = lifetime
+    } else {
+        let now = Date().timeIntervalSince1970
+        let lifetimeDate = Date().addingTimeInterval(deathDate - now)
+        lifetime = lifetimeDate.timeIntervalSince1970
+        lifetimeUpdateable = lifetime
     }
-    fatalError("should never happen") // TODO: remove this in a clean way
+
+    return Date(timeIntervalSince1970: lifetime)
 }
 
 func get_lifetime_to_display_updateable() -> Date {
-    if let userDefaults = UserDefaults(suiteName: "group.lifespan-timer") {
-        if UserDefaults.standard.userAlreadyLivedMoreThanAverage {
-            let lifetime = Calendar.current.date(byAdding: .year, value: 20, to: Date())!
-            userDefaults.setValue(lifetime.timeIntervalSince1970, forKey: "lifetime")
-            return lifetime
-        } else {
-            let death_date = userDefaults.double(forKey: "DeathDateUpdateable")
-            let now = Date().timeIntervalSince1970
-            let lifetime = Date().addingTimeInterval(death_date - now)
-            userDefaults.setValue(lifetime.timeIntervalSince1970, forKey: "lifetimeUpdateable")
-            return lifetime
-        }
+    @AppStorage("welcomeScreenShown", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var welcomeScreenShown: Bool = false
+
+    @AppStorage("userAlreadyLivedMoreThanAverage", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var userAlreadyLivedMoreThanAverage: Bool = false
+
+    @AppStorage("lifetime", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var lifetime: Double = 0.0
+
+    @AppStorage("lifetimeUpdateable", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var lifetimeUpdateable: Double = 0.0
+
+    @AppStorage("deathDateUpdateable", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var deathDateUpdateable: Double = 0.0
+
+    if userAlreadyLivedMoreThanAverage {
+        let lifetimeDate = Calendar.current.date(byAdding: .year, value: 20, to: Date())!
+        lifetime = lifetimeDate.timeIntervalSince1970
+    } else {
+        let now = Date().timeIntervalSince1970
+        let lifetimeDate = Date().addingTimeInterval(deathDateUpdateable - now)
+        lifetimeUpdateable = lifetimeDate.timeIntervalSince1970
     }
-    fatalError("should never happen") // TODO: remove this in a clean way
+
+    return Date(timeIntervalSince1970: lifetimeUpdateable)
 }
 
 struct RegularFlowView: View {
     @State private var refreshID = UUID()
     @State private var showInitialTimer = false
+
+    @State private var showPlusSelection = false
+    @State private var showMinusSelection = false
+
+
+    @AppStorage("deathDateUpdateable", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var deathDateUpdateable: Double = 0.0
+
+    @AppStorage("lifetime", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var lifetime: Double = 0.0
+
+    @AppStorage("lifetimeUpdateable", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var lifetimeUpdateable: Double = 0.0
+
+    @AppStorage("targetDate", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var targetDate: Date = Date()
 
     var body: some View {
         VStack(spacing: 20) {
@@ -138,28 +152,16 @@ struct RegularFlowView: View {
                 Text(showInitialTimer ? "Hide initial" : "Show initial")
                     .padding()
                     .fontDesign(.monospaced)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
+                    .background(Color.black)
+                    .foregroundColor(.blue)
                     .cornerRadius(10)
             }
 
             Text("")
 
-
             HStack(spacing: 20) {
                 Button(action: {
-                    if let userDefaults = UserDefaults(suiteName: "group.lifespan-timer") {
-                        let death_date = Date(timeIntervalSince1970: userDefaults.double(forKey: "DeathDateUpdateable"))
-                        let updated_death_date = Calendar.current.date(byAdding: .year, value: -1, to: death_date)!
-                        userDefaults.setValue(updated_death_date.timeIntervalSince1970, forKey: "DeathDateUpdateable")
-                        userDefaults.synchronize()
-                    } else {
-                        fatalError("should never happen") // TODO: remove this in a clean way
-                    }
-
-                    refreshID = UUID()
-                    updateWidgetValues(title: "-", subtitle: "1 year")
-
+                    showMinusSelection = true
                 }) {
                     Text("-")
                         .padding(20)
@@ -172,17 +174,7 @@ struct RegularFlowView: View {
                 }
 
                 Button(action: {
-                    if let userDefaults = UserDefaults(suiteName: "group.lifespan-timer") {
-                        let death_date = Date(timeIntervalSince1970: userDefaults.double(forKey: "DeathDateUpdateable"))
-                        let updated_death_date = Calendar.current.date(byAdding: .year, value: 1, to: death_date)!
-                        userDefaults.setValue(updated_death_date.timeIntervalSince1970, forKey: "DeathDateUpdateable")
-                        userDefaults.synchronize()
-                    } else {
-                        fatalError("should never happen") // TODO: remove this in a clean way
-                    }
-
-                    refreshID = UUID()
-                    updateWidgetValues(title: "+", subtitle: "2 years")
+                    showPlusSelection = true
                 }) {
                     Text("+")
                         .padding(20)
@@ -196,7 +188,14 @@ struct RegularFlowView: View {
             }
             .padding(.horizontal) // optional padding around buttons
 
-        }.animation(.default, value: showInitialTimer)
+        }
+        .animation(.default, value: showInitialTimer)
+        .sheet(isPresented: $showPlusSelection) {
+                PlusSelectionView(deathDateUpdateable: $deathDateUpdateable, refreshID: $refreshID)
+        }
+        .sheet(isPresented: $showMinusSelection) {
+                MinusSelectionView(deathDateUpdateable: $deathDateUpdateable, refreshID: $refreshID)
+        }
     }
 }
 
