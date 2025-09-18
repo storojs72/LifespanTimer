@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import WidgetKit
 
 struct PlusSelectionView: View {
     @Binding var deathDateUpdateable: Double
@@ -27,6 +28,8 @@ struct PlusSelectionView: View {
                     default:
                         fatalError()
                     }
+
+                    WidgetCenter.shared.reloadAllTimelines()
 
                     refreshID = UUID() // cause timer update on the main view
                     dismiss()  // close the sheet

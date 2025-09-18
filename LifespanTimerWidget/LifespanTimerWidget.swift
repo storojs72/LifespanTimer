@@ -8,29 +8,61 @@
 import WidgetKit
 import SwiftUI
 
+func get_lifetime_to_display_updateable() -> Date {
+    @AppStorage("welcomeScreenShown", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var welcomeScreenShown: Bool = false
+
+    @AppStorage("userAlreadyLivedMoreThanAverage", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var userAlreadyLivedMoreThanAverage: Bool = false
+
+    @AppStorage("lifetime", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var lifetime: Double = 0.0
+
+    @AppStorage("lifetimeUpdateable", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var lifetimeUpdateable: Double = 0.0
+
+    @AppStorage("deathDateUpdateable", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var deathDateUpdateable: Double = 0.0
+
+    if userAlreadyLivedMoreThanAverage {
+        let lifetimeDate = Calendar.current.date(byAdding: .year, value: 20, to: Date())!
+        lifetime = lifetimeDate.timeIntervalSince1970
+    } else {
+        let now = Date().timeIntervalSince1970
+        let lifetimeDate = Date().addingTimeInterval(deathDateUpdateable - now)
+        lifetimeUpdateable = lifetimeDate.timeIntervalSince1970
+    }
+
+    return Date(timeIntervalSince1970: lifetimeUpdateable)
+}
+
 struct SimpleEntry: TimelineEntry {
     let date: Date
-    let lifetimeEntryItem: Double
     let configuration: ConfigurationAppIntent
 }
 
 struct Provider: AppIntentTimelineProvider {
-    @AppStorage("lifetime", store: UserDefaults(suiteName: "group.lifespan-timer"))
-    var lifetime: Double = 0.0
-    
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), lifetimeEntryItem: 0.0, configuration: ConfigurationAppIntent())
+        SimpleEntry(date: Date(), configuration: ConfigurationAppIntent())
     }
 
     func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
-        return SimpleEntry(date: Date(), lifetimeEntryItem: lifetime, configuration: configuration)
+        return SimpleEntry(date: Date(), configuration: configuration)
     }
     
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
-        let entry = SimpleEntry(date: Date(), lifetimeEntryItem: lifetime, configuration: configuration)
+        var entries: [SimpleEntry] = []
 
-        // Reload as soon as possible
-        return Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(5)))
+        // Generate a timeline with 5 entries, one per hour
+        let currentDate = Date()
+        for hourOffset in 0 ..< 5 {
+            if let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate) {
+                let entry = SimpleEntry(date: entryDate, configuration: configuration)
+                entries.append(entry)
+            }
+        }
+
+        return Timeline(entries: entries, policy: .atEnd)
     }
 }
 
@@ -39,7 +71,7 @@ struct LifespanTimerWidgetEntryView : View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(Date(timeIntervalSince1970: entry.lifetimeEntryItem), style: .timer)
+            Text(get_lifetime_to_display_updateable(), style: .timer)
                 .multilineTextAlignment(.center)
                 .font(.callout)
                 .fontDesign(.monospaced)
