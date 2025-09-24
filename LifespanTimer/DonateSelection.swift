@@ -63,9 +63,15 @@ struct DonateSelectionView: View {
                 "iOS.LifespanTimer.donation.donation.large"
             ])
 
-            print("Loaded products: \(storeProducts)")
+            let order: [String: Int] = [
+                "iOS.LifespanTimer.donation.donation.small": 0,
+                "iOS.LifespanTimer.donation.donation.medium": 1,
+                "iOS.LifespanTimer.donation.donation.large": 2
+            ]
 
-            products = storeProducts
+            products = storeProducts.sorted {
+                (order[$0.id] ?? 999) < (order[$1.id] ?? 999)
+            }
         } catch {
             print("Failed to load products: \(error)")
         }

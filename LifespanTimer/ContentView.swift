@@ -95,8 +95,7 @@ struct RegularFlowView: View {
 
     @State private var showPlusSelection = false
     @State private var showMinusSelection = false
-
-    @State private var showDonateSelection = false
+    @State private var showSettings = false
 
 
     @AppStorage("deathDateUpdateable", store: UserDefaults(suiteName: "group.lifespan-timer"))
@@ -112,105 +111,96 @@ struct RegularFlowView: View {
     var targetDate: Date = Date()
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("")
-            Text("")
-            Text("")
-            Text("Your lifetime available:")
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.white)
-                .font(.largeTitle)
-                .fontDesign(.monospaced)
-                .frame(width: 300)
-            
-
-            Text(get_lifetime_to_display_updateable(), style: .timer)
-                .multilineTextAlignment(.center)
-                .font(.largeTitle)
-                .fontDesign(.monospaced)
-                .foregroundStyle(.green)
-                .id(refreshID)
-
-
-            if showInitialTimer {
-                Text(get_lifetime_to_display(), style: .timer)
-                    .multilineTextAlignment(.center)
-                    .font(.largeTitle)
-                    .fontDesign(.monospaced)
-                    .foregroundStyle(.green)
-                    .transition(.slide) // optional animation
-            } else {
+        NavigationStack {
+            VStack(spacing: 20) {
                 Text("")
+                Text("")
+                Text("")
+                Text("Your lifetime available:")
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.white)
+                    .font(.largeTitle)
+                    .fontDesign(.monospaced)
+                    .frame(width: 300)
+
+
+                Text(get_lifetime_to_display_updateable(), style: .timer)
                     .multilineTextAlignment(.center)
                     .font(.largeTitle)
                     .fontDesign(.monospaced)
                     .foregroundStyle(.green)
-                    .transition(.slide) // optional animation
-            }
+                    .id(refreshID)
 
-            Button(action: {
-                showInitialTimer.toggle() // toggle visibility
-            }) {
-                Text(showInitialTimer ? "Hide initial" : "Show initial")
-                    .padding()
-                    .fontDesign(.monospaced)
-                    .background(Color.black)
-                    .foregroundColor(.blue)
-                    .cornerRadius(10)
-            }
 
-            Text("")
-
-            HStack(spacing: 20) {
-                Button(action: {
-                    showMinusSelection = true
-                }) {
-                    Text("-")
-                        .padding(20)
+                if showInitialTimer {
+                    Text(get_lifetime_to_display(), style: .timer)
+                        .multilineTextAlignment(.center)
                         .font(.largeTitle)
                         .fontDesign(.monospaced)
-                        .frame(maxWidth: .infinity) // expand equally
-                        .background(Color.red)
-                        .foregroundColor(.white)
-                        .clipShape(Circle())
-                }
-
-                Button(action: {
-                    showPlusSelection = true
-                }) {
-                    Text("+")
-                        .padding(20)
+                        .foregroundStyle(.green)
+                        .transition(.slide) // optional animation
+                } else {
+                    Text("")
+                        .multilineTextAlignment(.center)
                         .font(.largeTitle)
                         .fontDesign(.monospaced)
-                        .frame(maxWidth: .infinity)
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .clipShape(Circle())
+                        .foregroundStyle(.green)
+                        .transition(.slide) // optional animation
+                }
+
+                Text("")
+
+                HStack(spacing: 20) {
+                    Button(action: {
+                        showMinusSelection = true
+                    }) {
+                        Text("-")
+                            .padding(20)
+                            .font(.largeTitle)
+                            .fontDesign(.monospaced)
+                            .frame(maxWidth: .infinity) // expand equally
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .clipShape(Circle())
+                    }
+
+                    Button(action: {
+                        showPlusSelection = true
+                    }) {
+                        Text("+")
+                            .padding(20)
+                            .font(.largeTitle)
+                            .fontDesign(.monospaced)
+                            .frame(maxWidth: .infinity)
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .clipShape(Circle())
+                    }
+                }
+                .padding(.horizontal) // optional padding around buttons
+            }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "gear")
+                            .imageScale(.large)
+                    }
                 }
             }
-            .padding(.horizontal) // optional padding around buttons
-
-            Button(action: {
-                showDonateSelection = true
-            }) {
-                Text("Donate")
-                    .padding()
-                    .fontDesign(.monospaced)
-                    .background(Color.black)
-                    .foregroundColor(.blue)
-                    .cornerRadius(10)
+            .animation(.default, value: showInitialTimer)
+            .sheet(isPresented: $showPlusSelection) {
+                    PlusSelectionView(deathDateUpdateable: $deathDateUpdateable, refreshID: $refreshID)
             }
-
-        }
-        .animation(.default, value: showInitialTimer)
-        .sheet(isPresented: $showPlusSelection) {
-                PlusSelectionView(deathDateUpdateable: $deathDateUpdateable, refreshID: $refreshID)
-        }
-        .sheet(isPresented: $showMinusSelection) {
-                MinusSelectionView(deathDateUpdateable: $deathDateUpdateable, refreshID: $refreshID)
-        }
-        .sheet(isPresented: $showDonateSelection) {
-                DonateSelectionView()
+            .sheet(isPresented: $showMinusSelection) {
+                    MinusSelectionView(deathDateUpdateable: $deathDateUpdateable, refreshID: $refreshID)
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsView(showInitialTimer: $showInitialTimer)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.black.ignoresSafeArea())
         }
     }
 }
