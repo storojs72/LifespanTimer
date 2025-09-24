@@ -1,5 +1,5 @@
 //
-//  Minus.swift
+//  PlusSelection.swift
 //  LifespanTimer
 //
 //  Created by Artem Storozhuk on 18.09.2025.

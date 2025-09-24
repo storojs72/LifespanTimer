@@ -96,6 +96,8 @@ struct RegularFlowView: View {
     @State private var showPlusSelection = false
     @State private var showMinusSelection = false
 
+    @State private var showDonateSelection = false
+
 
     @AppStorage("deathDateUpdateable", store: UserDefaults(suiteName: "group.lifespan-timer"))
     var deathDateUpdateable: Double = 0.0
@@ -188,6 +190,17 @@ struct RegularFlowView: View {
             }
             .padding(.horizontal) // optional padding around buttons
 
+            Button(action: {
+                showDonateSelection = true
+            }) {
+                Text("Donate")
+                    .padding()
+                    .fontDesign(.monospaced)
+                    .background(Color.black)
+                    .foregroundColor(.blue)
+                    .cornerRadius(10)
+            }
+
         }
         .animation(.default, value: showInitialTimer)
         .sheet(isPresented: $showPlusSelection) {
@@ -195,6 +208,9 @@ struct RegularFlowView: View {
         }
         .sheet(isPresented: $showMinusSelection) {
                 MinusSelectionView(deathDateUpdateable: $deathDateUpdateable, refreshID: $refreshID)
+        }
+        .sheet(isPresented: $showDonateSelection) {
+                DonateSelectionView()
         }
     }
 }

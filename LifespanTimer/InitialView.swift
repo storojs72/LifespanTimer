@@ -7,7 +7,6 @@
 
 import SwiftUI
 import WidgetKit
-import Combine
 
 // TODO: increase number of countries
 // This is the average life expectancy in Ukraine, Portugal, UK and USA
@@ -30,7 +29,7 @@ struct InitialView: View {
 
     func goHome() {
 
-        // transfer control to MainView
+        // transfer control to ContentView
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
             window.rootViewController = UIHostingController(rootView: ContentView())
