@@ -157,9 +157,11 @@ struct RegularFlowView: View {
 
                                     if now > endDate {
                                         userAlreadyLivedMoreThanAverage = true
+                                        WidgetCenter.shared.reloadAllTimelines()
                                     }
                                     if now > endDateUpdateable {
                                         updateableTimerEnded = true
+                                        WidgetCenter.shared.reloadAllTimelines()
                                     }
                                     try? await Task.sleep(for: .seconds(1))
                                 }

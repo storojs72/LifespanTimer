@@ -9,29 +9,15 @@ import WidgetKit
 import SwiftUI
 
 func get_lifetime_to_display_updateable() -> Date {
-    @AppStorage("welcomeScreenShown", store: UserDefaults(suiteName: "group.lifespan-timer"))
-    var welcomeScreenShown: Bool = false
-
-    @AppStorage("userAlreadyLivedMoreThanAverage", store: UserDefaults(suiteName: "group.lifespan-timer"))
-    var userAlreadyLivedMoreThanAverage: Bool = false
-
-    @AppStorage("lifetime", store: UserDefaults(suiteName: "group.lifespan-timer"))
-    var lifetime: Double = 0.0
-
     @AppStorage("lifetimeUpdateable", store: UserDefaults(suiteName: "group.lifespan-timer"))
     var lifetimeUpdateable: Double = 0.0
 
     @AppStorage("deathDateUpdateable", store: UserDefaults(suiteName: "group.lifespan-timer"))
     var deathDateUpdateable: Double = 0.0
 
-    if userAlreadyLivedMoreThanAverage {
-        let lifetimeDate = Calendar.current.date(byAdding: .year, value: 20, to: Date())!
-        lifetime = lifetimeDate.timeIntervalSince1970
-    } else {
-        let now = Date().timeIntervalSince1970
-        let lifetimeDate = Date().addingTimeInterval(deathDateUpdateable - now)
-        lifetimeUpdateable = lifetimeDate.timeIntervalSince1970
-    }
+    let now = Date().timeIntervalSince1970
+    let lifetimeDate = Date().addingTimeInterval(deathDateUpdateable - now)
+    lifetimeUpdateable = lifetimeDate.timeIntervalSince1970
 
     return Date(timeIntervalSince1970: lifetimeUpdateable)
 }
@@ -67,20 +53,59 @@ struct Provider: AppIntentTimelineProvider {
 }
 
 struct LifespanTimerWidgetEntryView : View {
+    @Environment(\.widgetFamily) var family
+
     var entry: Provider.Entry
-    
+
+    @AppStorage("userAlreadyLivedMoreThanAverage", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var userAlreadyLivedMoreThanAverage: Bool = false
+
+    @AppStorage("updateableTimerEnded", store: UserDefaults(suiteName: "group.lifespan-timer"))
+    var updateableTimerEnded: Bool = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(get_lifetime_to_display_updateable(), style: .timer)
-                .multilineTextAlignment(.center)
-                .font(.callout)
-                .fontDesign(.monospaced)
-                .frame(width: 300)
-                .foregroundStyle(.green)
-                .font(.headline)
+            if userAlreadyLivedMoreThanAverage {
+                Text("Congratulations!")
+                    .multilineTextAlignment(.center)
+                    .font(fontForFamily(family))
+                    .fontDesign(.monospaced)
+                    .foregroundStyle(.green)
+                    .lineLimit(1)
+                    .frame(width: 300)
+            } else if updateableTimerEnded {
+                Text("Your lifetime ended!")
+                    .multilineTextAlignment(.center)
+                    .font(fontForFamily(family))
+                    .fontDesign(.monospaced)
+                    .foregroundStyle(.red)
+                    .lineLimit(1)
+                    .frame(width: 300)
+            } else {
+                Text(get_lifetime_to_display_updateable(), style: .timer)
+                    .multilineTextAlignment(.center)
+                    .font(.callout)
+                    .fontDesign(.monospaced)
+                    .frame(width: 300)
+                    .foregroundStyle(.green)
+                    .font(.headline)
+            }
         }
         .padding()
     }
+
+    private func fontForFamily(_ family: WidgetFamily) -> Font {
+            switch family {
+            case .systemSmall:
+                return .caption
+            case .systemMedium:
+                return .body
+            case .systemLarge:
+                return .title
+            default:
+                return .body
+            }
+        }
 }
 
 struct LifespanTimerWidget: Widget {
